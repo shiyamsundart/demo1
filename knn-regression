@@ -1,0 +1,59 @@
+import math
+from collections import Counter
+
+class KNNRegressor:
+    def __init__(self, k=5):
+        self.k = k
+        self.X_train = None
+        self.y_train = None
+
+    def fit(self, X_train, y_train):
+        self.X_train = X_train
+        self.y_train = y_train
+
+    def predict(self, X_test):
+        y_pred = []
+        for x in X_test:
+            distances = []
+            for i, x_train in enumerate(self.X_train):
+                distance = self._euclidean_distance(x, x_train)
+                distances.append((distance, self.y_train[i]))
+
+            distances.sort(key=lambda d: d[0])
+            k_nearest = distances[:self.k]
+
+            y_pred.append(self._mean_regression(k_nearest))
+
+        return y_pred
+
+    def _euclidean_distance(self, x1, x2):
+        distance = 0
+        for i in range(len(x1)):
+            distance += (x1[i] - x2[i]) ** 2
+        return math.sqrt(distance)
+
+    def _mean_regression(self, k_nearest):
+        total = sum([y for _, y in k_nearest])
+        return total / self.k
+
+
+# Example dataset
+X_train = [[65.5], [71.5], [69.3], [68.3], [67.7]]
+y_train = [112.9, 136.4, 153.1, 142.3, 144.2]
+
+X_test = [[66.4],[67.6],[68.3]]
+
+# Create and train KNNRegressor
+knn = KNNRegressor(k=3)
+knn.fit(X_train, y_train)
+
+# Predict
+predictions = knn.predict(X_test)
+print(predictions)
+import numpy as np
+
+# Calculate Mean Squared Error (MSE) loss
+mse_loss = np.mean((np.array(predictions) - np.array(predictions))**2)
+
+print("MSE Loss:", mse_loss)
+
